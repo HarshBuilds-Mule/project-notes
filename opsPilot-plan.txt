@@ -1,0 +1,178 @@
+
++ Week 1: Foundation & Data (Days 1–7)
+
+Goal: Establish the physical boundaries of the project—the UI, the database, and the blank servers.
+
+Day 1: Frontend Skeleton
+Action: Initialize a fresh SvelteKit project. Build a static chat interface with a dark, minimalist aesthetic (navy/black background, clean typography).
+-Deliverable: A browser window where you can type a message and see it appear in a chat bubble.
+-How it helps: You get an immediate visual anchor. When demonstrating this to recruiters, a clean, distraction-free UI proves you care about user experience, not just backend logic.
+
+
+Day 2: MySQL Setup & Schema
+-Action: Install MySQL. Create a database with two tables: `inventory` and `shipments`. Insert 5 rows of dummy data. *(Copy/paste code provided at the bottom).*
+-Deliverable: A local database answering SQL queries.
+-How it helps: AI hallucinations happen when LLMs lack facts. By anchoring the project in a relational database from Day 2, you prove you understand deterministic, enterprise-grade data management.
+
+
+Day 3: External System Mocking
+-Action: Write a 20-line Node.js Express server that returns static JSON when you hit `/track-shipment`.
+-Deliverable: A fake "FedEx/DHL API" running on `localhost:4000`.
+-How it helps: In the real world, you rarely have access to production partner APIs during development. Demonstrating that you can build and use mock servers shows senior-level architectural thinking.
+
+
+Day 4: MuleSoft Environment Initialization
+-Action: Open Anypoint Studio. Create a Mule Community Edition project. Set up a basic HTTP Listener that returns "Status: OK".
+-Deliverable: A running Mule instance on `localhost:8081`.
+-How it helps: This is the core orchestration engine. Setting it up early ensures you aren't fighting Java/Maven configuration errors later when the logic gets complex.
+
+
+Day 5: MCP Server Base
+-Action: Initialize a Node.js Model Context Protocol server using the official SDK. Register a dummy tool called `ping_system`.
+-Deliverable: An MCP server waiting for a connection.
+-How it helps: This proves you are adopting the absolute bleeding edge of AI tooling standards. It separates the AI's logic from the execution logic.
+
+
+Day 6: The AI Connection
+-Action: Connect OpenRouter (or Ollama) to your MCP server. Prompt the AI: *"You are OpsPilot. Call the ping_system tool."*
+-Deliverable: The AI successfully triggers the dummy tool on your MCP server.
+-How it helps: This is the "Eureka!" moment. You have successfully bridged a natural language model to a deterministic code execution environment.
+
+
+Day 7: Buffer & End-to-End Test
+-Action: Tie the SvelteKit UI to the AI backend. Type "Ping the system" in the UI, and watch the MCP server log the hit.
+-Deliverable: Full communication from the browser down to the bridge layer.
+-How it helps: Validating the architecture in++++++ Week 1 prevents catastrophic debugging loops in+ Week 4.
+
+
+
+---
+
++ Week 2: The MuleSoft Engine (Days 8–14)
+
+Goal: Build the APIs that actually do the work. The AI will eventually control these.
+
+Day 8: System API - Database Connector
+-Action: Build a Mule flow that uses the Database Connector to `SELECT -FROM inventory` and expose it via an HTTP endpoint.
+-Deliverable: Hitting `localhost:8081/api/inventory` returns your MySQL data.
+-How it helps: Demonstrates fundamental API-led connectivity (System APIs unlock data silos).
+
+
+Day 9: System API - HTTP Connector
+-Action: Build a Mule flow that calls your mock courier API from Day 3.
+-Deliverable: Hitting `localhost:8081/api/courier` returns the mock shipping JSON.
+-How it helps: Shows you can aggregate external REST services through a centralized enterprise service bus (ESB).
+
+
+Day 10: Process API - Orchestration
+-Action: Build a Mule flow that receives an item ID, checks the database (Day 8), and if stock < 10, updates the database to mark it "ordered".
+-Deliverable: A single API call that performs a multi-step business logic check.
+-How it helps: This is the meat of MuleSoft. It proves you can orchestrate multi-step workflows, not just build dumb data pipes.
+
+
+Day 11: DataWeave Formatting
+-Action: Add Transform Message components (`.dwl`) to your flows to ensure the JSON outputs are clean, flat, and easy for an AI to read.
+-Deliverable: Standardized JSON responses across all Mule endpoints.
+-How it helps: AI models get confused by deeply nested, messy XML/JSON. Clean DataWeave transformations prove you know how to prepare data for machine consumption.
+
+
+Day 12: RabbitMQ Message Broker Setup
+-Action: Install RabbitMQ. Create a queue named `failed_integrations`.
+-Deliverable: A live message broker ready to accept events.
+-How it helps: Event-driven architecture is mandatory for enterprise systems. This moves your project from "toy" to "production-ready".
+
+
+Day 13: Error Handling & Dead Letter Queues
+-Action: Add an `On-Error-Propagate` scope to your Mule flows. If a database query fails, publish a JSON error message to the RabbitMQ queue.
+-Deliverable: Breaking the DB connection intentionally results in a message appearing in RabbitMQ.
+-How it helps: Recruiters ask about error handling constantly. Showing a system that catches failures and queues them for review is a massive green flag.
+
+
+Day 14: Postman Validation
+-Action: Test every single Mule endpoint via Postman. Ensure success paths and error paths work perfectly.
+-Deliverable: A documented Postman collection.
+-How it helps: Proves the MuleSoft layer is completely decoupled and stable before introducing the unpredictability of AI.
+
+
+
+---
+
++ Week 3: Bridging AI and Enterprise (Days 15–21)
+
+Goal: Give the AI the remote controls to operate the MuleSoft APIs.
+
+Day 15: MCP Tool - Inventory
+-Action: Write the `check_inventory` tool in your MCP server. Make it fire an HTTP GET request to your MuleSoft inventory API.
+-Deliverable: The AI can now answer: *"How many laptops do we have?"*
+-How it helps: You are proving that AI can safely read internal enterprise states.
+
+
+Day 16: MCP Tool - Restock
+-Action: Write the `trigger_restock` tool in MCP. Make it POST to your MuleSoft Process API.
+-Deliverable: The AI can now execute: *"Order more laptops."*
+-How it helps: Moving from *read-only-AI to *action-taking-AI. This is the holy grail of modern operational automation.
+
+
+Day 17: MCP Tool - Incident Review
+-Action: Write the `check_errors` tool. Make it pull messages from the RabbitMQ queue.
+-Deliverable: The AI can answer: *"Did any system integrations fail today?"*
+-How it helps: This is a killer feature for demos. It shows the AI acting as a DevOps assistant, capable of reading queues and summarizing technical faults in plain English.
+
+
+Day 18: System Prompt Engineering
+-Action: Write the strict personality and ruleset for OpsPilot. (e.g., *"You are a precise tool. Do not guess inventory. Only use the tools provided."*)
+-Deliverable: A highly reliable, non-hallucinating agent.
+-How it helps: Shows you understand AI governance and safety—critical for enterprise deployments.
+
+
+Day 19: UI Integration (The Loading State)
+-Action: Add typing indicators and "Calling Tool..." badges to the SvelteKit UI so the user knows when the AI is waiting on MuleSoft.
+-Deliverable: A polished, responsive user experience.
+-How it helps: Tool calls take a few seconds. Good UI feedback prevents the user from thinking the app is broken.
+
+
+Day 20: Full System Rehearsal
+-Action: Run through the main workflows entirely through the SvelteKit chat window.
+-Deliverable: A fully working system from frontend to database and back.
+-How it helps: Validates the integration of all 5 technologies.
+
+
+Day 21: Edge Case Testing
+-Action: Ask the AI weird questions. Break the database. Force the AI to explain the RabbitMQ errors.
+-Deliverable: A robust system that degrades gracefully.
+-How it helps: Prepares you for live demos where things inevitably go wrong.
+
+
+
+---
+
+Week 4: Polish & Portfolio Presentation (Days 22–25)
+
+Goal: Package the technical work so recruiters and engineering managers instantly understand its value.
+
+Day 22: Live Log Drawer
+-Action: Build a small expanding panel at the bottom of your SvelteKit UI that shows the raw JSON data the MCP server is sending/receiving in real time.
+-Deliverable: A "developer mode" view.
+-How it helps: When an interviewer asks, "How is this actually working?", you open the drawer and show them the exact JSON-RPC payloads flying back and forth. It proves you aren't faking it.
+
+
+Day 23: Architecture Diagrams
+-Action: Use a tool like Excalidraw or Mermaid to draw the exact flow of data from SvelteKit -> MCP -> MuleSoft -> MySQL/RabbitMQ.
+-Deliverable: A high-quality PNG for your GitHub README.
+-How it helps: System design is heavily tested in interviews. A diagram proves you understand the macro-architecture.
+
+
+Day 24: Deployment & Documentation
+-Action: Write a comprehensive `README.md` explaining the "Why," the "Architecture," and "How to run locally."
+-Deliverable: A professional GitHub repository.
+-How it helps: The README is your project's resume. If it looks amateur, they won't look at the code.
+
+
+Day 25: The Demo Video
+-Action: Record a 2-minute Loom video walking through the three main features (Inventory, Restock, Error Catching). Link it at the very top of your README.
+-Deliverable: A master presentation asset.
+-How it helps: Recruiters will rarely clone and run your database/queues. A clean video guarantees they see your hard work functioning perfectly.
+
+
+
+---
